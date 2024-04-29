@@ -1,0 +1,35 @@
+# Entorno virtual
+venv/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Creado por las herramientas de desarrollo
+*.swp
+*.swo
+
+# Archivo de configuraci�n local
+.env
+
+# Archivos de registro y cach�
+logs/
+*.log
+*.sqlite3
+*.db
+
+# Archivo de configuraci�n de IDE
+.idea/
+.vscode/
+
+# Dependencias del proyecto
+*.egg-info/
+dist/
+build/
+
+# Otros archivos y directorios generados
+*.bak
+*.swp
+*.swo
+*.DS_Store

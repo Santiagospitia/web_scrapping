@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+html {
+  @apply bg-[#7942A7] md:bg-[url('assets/bg5.jpg')] bg-scroll md:bg-fixed md:bg-cover md:bg-right overflow-x-hidden;
+}
+img {
+  -webkit-user-drag: none;
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}
