@@ -2,16 +2,34 @@ from flask import Flask, jsonify, request
 import requests
 from bs4 import BeautifulSoup
 from flask_cors import CORS
+import google.generativeai as genai
 
 app = Flask(__name__)
 CORS(app)
+
+genai.configure(api_key='AIzaSyA_HsxcneaI68dK_UyLeSuw3A0b48KkOB4')
+model = genai.GenerativeModel('gemini-pro')
+
+prompt = 'Eres un gran captador de sentimientos a través de texto. A continuación, te voy a pasar una lista de reseñas de un videojuego y me gustaría que me dijeras, según las reseñas, por qué el juego es bueno y por qué el juego es malo. Seperandolo en títulos respectivamente, es decir, colocar POR QUÉ EL JUEGO ES BUENO y POR QUÉ EL JUEGO ES MALO. Por favor, pasame el texto en prosa, es decir, no hagas listas con las cosas buenas y malas, sino que hablame en prosa. Aquí tienes las reseñas: '
+
 
 @app.route('/')
 def index():
     return 'Hola mundo'
 
 
-@app.route('/reviews/<id>/<string:game_name>')
+@app.route('/analyze/<id>/<string:game_name>')
+def analyze(id,game_name):
+    try:
+        revies = get_reviews(id,game_name)['reviews']
+        reviews_text = [review['text'] for review in revies]
+        reviews_string = ' '.join(reviews_text)
+        response = model.generate_content(prompt + reviews_string)
+        return jsonify({'response': response.text})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+#@app.route('/reviews/<id>/<string:game_name>')
 def get_reviews(id,game_name):
     try:
         opencritic_url = f'https://opencritic.com/game/{id}/{game_name}/reviews?sort=newest'
@@ -24,7 +42,7 @@ def get_reviews(id,game_name):
             reviews.append({'text': text})
         return {'reviews': reviews}
     except Exception as e:
-        return jsonify({"error": str(errh)}), 500
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route('/search/<string:game_name>')

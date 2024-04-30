@@ -6,13 +6,16 @@ import "./App.css";
 import GameCard from "./components/GameCard";
 import Nav from "./components/Nav";
 import Logo from "./components/Logo";
+import GameDetails from "./components/GameDetails";
 
 let numResults;
 
 const App = () => {
+  console.log('Rendering App');
   const [searchTerm, setSearchTerm] = useState("");
   const [games, setGames] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [selectedGame, setSelectedGame] = useState(null);
   let [counter, setCounter] = useState(1);
 
   const increment = () => {
@@ -34,11 +37,27 @@ const App = () => {
         `http://localhost:5000/search/${title}`
       );
       const data = await response.json();
+      console.log("holis", data)
       setGames(data);
       numResults = data.length;
     }
     setLoading(false);
   };
+
+  const handleGameClick = (game) => {
+    setSelectedGame(game);
+  };
+
+  const goBack = () => {
+    setSelectedGame(null);
+  };
+
+  if (selectedGame) {
+    return (
+      <GameDetails game={selectedGame} goBack={goBack} />
+    );
+  }
+
   return (
     <>
       <div className="w-full h-full p-2">
@@ -77,7 +96,9 @@ const App = () => {
               {/* grid of games */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 ">
                 {games.map((item, index) => (
-                  <GameCard game={item} key={index} />
+                  <div key={index} onClick={() => handleGameClick(item)}>
+                    <GameCard game={item} />
+                  </div>
                 ))}
               </div>
               <Nav
