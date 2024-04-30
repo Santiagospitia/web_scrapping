@@ -3,11 +3,16 @@ import requests
 from bs4 import BeautifulSoup
 from flask_cors import CORS
 import google.generativeai as genai
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
 app = Flask(__name__)
 CORS(app)
 
-genai.configure(api_key='AIzaSyA_HsxcneaI68dK_UyLeSuw3A0b48KkOB4')
+
+API_KEY = os.getenv("API_KEY")
+genai.configure(api_key=API_KEY)
 model = genai.GenerativeModel('gemini-pro')
 
 prompt = 'Eres un gran captador de sentimientos a través de texto. A continuación, te voy a pasar una lista de reseñas de un videojuego y me gustaría que me dijeras, según las reseñas, por qué el juego es bueno y por qué el juego es malo. Seperandolo en títulos respectivamente, es decir, colocar POR QUÉ EL JUEGO ES BUENO y POR QUÉ EL JUEGO ES MALO. Por favor, pasame el texto en prosa, es decir, no hagas listas con las cosas buenas y malas, sino que hablame en prosa. Aquí tienes las reseñas: '
