@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 from flask_cors import CORS
 import google.generativeai as genai
 from dotenv import load_dotenv
-import os
+import os   
 
 load_dotenv()
 app = Flask(__name__)
@@ -49,6 +49,34 @@ def get_reviews(id,game_name):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/rawg_analyze/<game_name>')
+def analyze_rawg(game_name):
+    revies = get_rawg_review(game_name)['reviews']
+    reviews_text = [review['text'] for review in revies]
+    reviews_string = ' '.join(reviews_text)
+    response = model.generate_content(prompt + reviews_string)
+    return jsonify({'response': response.text})
+
+def get_rawg_review(game_name):
+    try:    
+        rawg_url = f'https://rawg.io/games/{game_name}'
+
+        response = requests.get(rawg_url)
+        response.raise_for_status()
+        soup = BeautifulSoup(response.text, 'html.parser')
+        reviews = []
+        count = 0
+
+        cards_view = soup.find_all('div', class_='review-card__text')
+
+        for card in cards_view:
+            text = card.text.strip()
+            reviews.append({"text":text})
+
+        return {"reviews":reviews}
+
+    except Exception as e:
+        return jsonify({"error": str(e)})
 
 @app.route('/search/<string:game_name>')
 def search_game(game_name):
