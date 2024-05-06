@@ -34,7 +34,7 @@ const App = () => {
     setLoading(true);
     if (title !== "") {
       const response = await fetch(
-        `http://localhost:5000/search/${title}`
+        `https://trashgame-back.onrender.com/search/${title}`
       );
       const data = await response.json();
       console.log("holis", data)
