@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 const GameDetails = ({ game, goBack }) => {
   const [analyze, setAnalyze] = useState("");
@@ -28,6 +28,10 @@ const GameDetails = ({ game, goBack }) => {
   }, []);
 
   const renderAnalyze = () => {
+    if (!analyzeRef.current) {
+      return <p className="text-gray-200 text-center">No se encontraron reseñas</p>;
+    }
+
     const sections = analyzeRef.current.split("**");
     return (
       <div className="text-gray-200 text-center">
