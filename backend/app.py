@@ -34,6 +34,7 @@ def analyze(id,game_name):
         try:
             reviews2 = get_rawg_review(game_name)['reviews']
             reviews_text2 = [review['text'] for review in reviews2]
+            print("exito")
         except Exception as e:
             reviews_text2 = []
             print(f"Error obteniendo reviews de RAWG: {str(e)}")
