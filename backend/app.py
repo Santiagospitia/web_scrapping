@@ -15,7 +15,7 @@ API_KEY = os.getenv("API_KEY")
 genai.configure(api_key=API_KEY)
 model = genai.GenerativeModel('gemini-pro')
 
-prompt = 'Eres un gran captador de sentimientos a través de texto. A continuación, te voy a pasar una lista de reseñas de un videojuego y me gustaría que me dijeras, según las reseñas, por qué el juego es bueno y por qué el juego es malo. Seperandolo en títulos respectivamente, es decir, colocar POR QUÉ EL JUEGO ES BUENO y POR QUÉ EL JUEGO ES MALO. Por favor, pasame el texto en prosa, es decir, no hagas listas con las cosas buenas y malas, sino que hablame en prosa. Aquí tienes las reseñas: '
+prompt = 'Eres un gran captador de sentimientos a través de texto. A continuación, te voy a pasar una lista de reseñas de un videojuego y me gustaría que me dijeras, según las reseñas, por qué el juego es bueno y por qué el juego es malo. Seperandolo en títulos respectivamente, es decir, colocar **POR QUÉ EL JUEGO ES BUENO** y **POR QUÉ EL JUEGO ES MALO**. Por favor, pasame el texto en prosa, es decir, no hagas listas con las cosas buenas y malas, sino que hablame en prosa. Aquí tienes las reseñas: '
 
 
 @app.route('/')
@@ -25,10 +25,22 @@ def index():
 
 @app.route('/analyze/<id>/<string:game_name>')
 def analyze(id,game_name):
+    print("hola")
     try:
-        revies = get_reviews(id,game_name)['reviews']
-        reviews_text = [review['text'] for review in revies]
+        print("entré")
+        reviews1 = get_reviews(id,game_name)['reviews']
+        reviews_text1 = [review['text'] for review in reviews1]
+
+        try:
+            reviews2 = get_rawg_review(game_name)['reviews']
+            reviews_text2 = [review['text'] for review in reviews2]
+        except Exception as e:
+            reviews_text2 = []
+            print(f"Error obteniendo reviews de RAWG: {str(e)}")
+
+        reviews_text = reviews_text1 + reviews_text2
         reviews_string = ' '.join(reviews_text)
+
         response = model.generate_content(prompt + reviews_string)
         return jsonify({'response': response.text})
     except Exception as e:
@@ -38,6 +50,7 @@ def analyze(id,game_name):
 def get_reviews(id,game_name):
     try:
         opencritic_url = f'https://opencritic.com/game/{id}/{game_name}/reviews?sort=newest'
+        print("opencritic_url: ",opencritic_url)
         response = requests.get(opencritic_url)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
@@ -49,13 +62,13 @@ def get_reviews(id,game_name):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route('/rawg_analyze/<game_name>')
-def analyze_rawg(game_name):
-    revies = get_rawg_review(game_name)['reviews']
-    reviews_text = [review['text'] for review in revies]
-    reviews_string = ' '.join(reviews_text)
-    response = model.generate_content(prompt + reviews_string)
-    return jsonify({'response': response.text})
+# @app.route('/rawg_analyze/<game_name>')
+# def analyze_rawg(game_name):
+#     revies = get_rawg_review(game_name)['reviews']
+#     reviews_text = [review['text'] for review in revies]
+#     reviews_string = ' '.join(reviews_text)
+#     response = model.generate_content(prompt + reviews_string)
+#     return jsonify({'response': response.text})
 
 def get_rawg_review(game_name):
     try:    
@@ -76,7 +89,8 @@ def get_rawg_review(game_name):
         return {"reviews":reviews}
 
     except Exception as e:
-        return jsonify({"error": str(e)})
+        print("error: ",str(e))
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/search/<string:game_name>')
 def search_game(game_name):
