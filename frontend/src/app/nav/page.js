@@ -16,7 +16,7 @@ const GameDetails = ({ game, goBack }) => {
       try {
         if (!isFetched) {
           setIsFetched(true);
-          const response = await fetch(`http://localhost:5000/analyze/13320/raft`);
+          const response = await fetch(`https://trashgame-back.onrender.com/analyze/13320/raft`);
           const data = await response.json();
           analyzeRef.current = data.response;
           //setAnalyze(data.response);
