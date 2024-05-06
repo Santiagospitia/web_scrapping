@@ -12,6 +12,7 @@ CORS(app)
 
 
 API_KEY = os.getenv("API_KEY")
+OPENCRITICS_API_KEY = os.getenv("OPENCRITICS_API_KEY")
 genai.configure(api_key=API_KEY)
 model = genai.GenerativeModel('gemini-pro')
 
@@ -22,19 +23,16 @@ prompt = 'Eres un gran captador de sentimientos a través de texto. A continuaci
 def index():
     return 'Hola mundo'
 
-
+#Se obtienen las reseñas de un videojuego de la página de OpenCritic y de RAWG, se concatenan y se envían al modelo para que genere un texto con las razones por las que el juego es bueno y malo.
 @app.route('/analyze/<id>/<string:game_name>')
 def analyze(id,game_name):
-    print("hola")
     try:
-        print("entré")
         reviews1 = get_reviews(id,game_name)['reviews']
         reviews_text1 = [review['text'] for review in reviews1]
 
         try:
             reviews2 = get_rawg_review(game_name)['reviews']
             reviews_text2 = [review['text'] for review in reviews2]
-            print("exito")
         except Exception as e:
             reviews_text2 = []
             print(f"Error obteniendo reviews de RAWG: {str(e)}")
@@ -47,11 +45,10 @@ def analyze(id,game_name):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-#@app.route('/reviews/<id>/<string:game_name>')
+#webscrapping a la página de OpenCritic para obtener las reseñas de un videojuego.
 def get_reviews(id,game_name):
     try:
         opencritic_url = f'https://opencritic.com/game/{id}/{game_name}/reviews?sort=newest'
-        print("opencritic_url: ",opencritic_url)
         response = requests.get(opencritic_url)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, 'html.parser')
@@ -63,14 +60,8 @@ def get_reviews(id,game_name):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# @app.route('/rawg_analyze/<game_name>')
-# def analyze_rawg(game_name):
-#     revies = get_rawg_review(game_name)['reviews']
-#     reviews_text = [review['text'] for review in revies]
-#     reviews_string = ' '.join(reviews_text)
-#     response = model.generate_content(prompt + reviews_string)
-#     return jsonify({'response': response.text})
 
+#webscrapping a la página de RAWG para obtener las reseñas de un videojuego.
 def get_rawg_review(game_name):
     try:    
         rawg_url = f'https://rawg.io/games/{game_name}'
@@ -93,6 +84,8 @@ def get_rawg_review(game_name):
         print("error: ",str(e))
         return jsonify({"error": str(e)}), 500
 
+
+#Se utiliza una API para obtener la lista de videojuegos que coinciden con la palabra que ingresa el usuario.
 @app.route('/search/<string:game_name>')
 def search_game(game_name):
     options = {
@@ -100,7 +93,7 @@ def search_game(game_name):
         'url': 'https://opencritic-api.p.rapidapi.com/game/search',
         'params': {'criteria': game_name},
         'headers': {
-            'X-RapidAPI-Key': 'c35c71d756msh7a289352821bdb6p172b17jsn0c43e3135bf2',
+            'X-RapidAPI-Key': OPENCRITICS_API_KEY,
             'X-RapidAPI-Host': 'opencritic-api.p.rapidapi.com'
         }
     }
