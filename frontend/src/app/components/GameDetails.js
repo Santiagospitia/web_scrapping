@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 const GameDetails = ({ game, goBack }) => {
   const [analyze, setAnalyze] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isFetched, setIsFetched] = useState(false);
   const analyzeRef = useRef("");
 
@@ -22,13 +23,17 @@ const GameDetails = ({ game, goBack }) => {
         console.error("Error fetching advantages and disadvantages:", error);
       }
       setLoading(false);
+      setIsLoading(false);
     };
 
     fetchAdvantagesAndDisadvantages();
   }, []);
 
   const renderAnalyze = () => {
-    if (!analyzeRef.current) {
+    if (isLoading){
+      return <p className="text-gray-200 text-center">Cargando análisis...</p>;
+    }
+    else if (!analyzeRef.current) {
       return <p className="text-gray-200 text-center">No se encontraron reseñas</p>;
     }
 
